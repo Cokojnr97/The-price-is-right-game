@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Price is Right - Game Show</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 The Price is Right</h1>
+            <p class="tagline">Come on down! Play your favorite pricing games!</p>
+        </header>
+
+        <div id="game-selection" class="game-selection">
+            <h2>Choose Your Game</h2>
+            <div class="game-buttons">
+                <button class="game-btn" onclick="startGame('bag')">
+                    <span class="game-icon">🛍️</span>
+                    <h3>It's in the Bag</h3>
+                    <p>Guess the prices of grocery items!</p>
+                </button>
+                <button class="game-btn" onclick="startGame('pair')">
+                    <span class="game-icon">🎯</span>
+                    <h3>Pick a Pair</h3>
+                    <p>Match items with their correct prices!</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- It's in the Bag Game -->
+        <div id="bag-game" class="game-container" style="display: none;">
+            <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+            <h2>🛍️ It's in the Bag</h2>
+            <p class="game-instructions">Guess the total price of all items in the bag! You have 3 tries.</p>
+            
+            <div class="game-content">
+                <div class="items-display" id="bag-items"></div>
+                
+                <div class="game-stats">
+                    <div class="stat">
+                        <span class="stat-label">Tries Left:</span>
+                        <span class="stat-value" id="bag-tries">3</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Target Total:</span>
+                        <span class="stat-value" id="bag-total">$???</span>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <label for="bag-guess">Your Guess:</label>
+                    <div class="input-group">
+                        <span class="dollar-sign">$</span>
+                        <input type="number" id="bag-guess" min="0" step="0.01" placeholder="0.00">
+                        <button class="submit-btn" onclick="submitBagGuess()">Submit Guess</button>
+                    </div>
+                </div>
+
+                <div id="bag-feedback" class="feedback"></div>
+                <div id="bag-result" class="result"></div>
+            </div>
+        </div>
+
+        <!-- Pick a Pair Game -->
+        <div id="pair-game" class="game-container" style="display: none;">
+            <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+            <h2>🎯 Pick a Pair</h2>
+            <p class="game-instructions">Match each item with its correct price! Click an item, then click its price.</p>
+            
+            <div class="game-content">
+                <div class="game-stats">
+                    <div class="stat">
+                        <span class="stat-label">Matches Found:</span>
+                        <span class="stat-value" id="pair-matches">0 / 5</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Time:</span>
+                        <span class="stat-value" id="pair-timer">0:00</span>
+                    </div>
+                </div>
+
+                <div class="pair-grid">
+                    <div class="items-column">
+                        <h3>Items</h3>
+                        <div id="pair-items" class="pair-items"></div>
+                    </div>
+                    <div class="prices-column">
+                        <h3>Prices</h3>
+                        <div id="pair-prices" class="pair-prices"></div>
+                    </div>
+                </div>
+
+                <div id="pair-feedback" class="feedback"></div>
+                <div id="pair-result" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
