@@ -1,3 +1,7 @@
+// Constants
+const SELECTION_CLEAR_DELAY = 800;  // ms to wait before clearing incorrect selections
+const FEEDBACK_CLEAR_DELAY = 2000;  // ms to wait before clearing feedback messages
+
 // Game state
 let currentGame = null;
 let bagGameState = {
@@ -363,7 +367,7 @@ function checkPairMatch() {
             document.querySelectorAll('.pair-item, .pair-price').forEach(el => {
                 el.classList.remove('selected');
             });
-        }, 800);
+        }, SELECTION_CLEAR_DELAY);
     }
     
     // Reset selections
@@ -376,13 +380,13 @@ function showPairFeedback(message, type) {
     feedback.textContent = message;
     feedback.className = `feedback ${type}`;
     
-    // Clear feedback after 2 seconds
+    // Clear feedback after a delay
     setTimeout(() => {
         if (feedback.textContent === message) {
             feedback.textContent = '';
             feedback.className = 'feedback';
         }
-    }, 2000);
+    }, FEEDBACK_CLEAR_DELAY);
 }
 
 function startPairTimer() {
