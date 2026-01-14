@@ -1,0 +1,234 @@
+/* CSS Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header Styles */
+.main-header {
+    background: linear-gradient(135deg, #FF4136 0%, #DC143C 100%);
+    padding: 40px 0;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border-bottom: 8px solid #FFD700;
+}
+
+.game-title {
+    font-family: 'Bangers', cursive;
+    font-size: 4.5rem;
+    color: #FFD700;
+    text-shadow: 
+        4px 4px 0 #FF1493,
+        8px 8px 0 #0066FF,
+        -2px -2px 0 #fff;
+    letter-spacing: 5px;
+    margin-bottom: 10px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.game-subtitle {
+    font-size: 1.5rem;
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Main Content */
+.main-content {
+    padding: 60px 0;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 40px;
+    margin-top: 20px;
+}
+
+/* Game Card Styles */
+.game-card {
+    display: block;
+    text-decoration: none;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    height: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    border: 6px solid #fff;
+}
+
+.game-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.game1 {
+    background: linear-gradient(135deg, #0066FF 0%, #00BFFF 100%);
+}
+
+.game2 {
+    background: linear-gradient(135deg, #FF1493 0%, #FF69B4 100%);
+}
+
+.game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 255, 255, 0.05) 10px,
+            rgba(255, 255, 255, 0.05) 20px
+        );
+    pointer-events: none;
+}
+
+.game-card-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 40px;
+    text-align: center;
+    z-index: 1;
+}
+
+.game-name {
+    font-family: 'Bangers', cursive;
+    font-size: 3rem;
+    color: #FFD700;
+    text-shadow: 
+        3px 3px 0 #000,
+        -1px -1px 0 #fff;
+    margin-bottom: 20px;
+    letter-spacing: 3px;
+}
+
+.game-description {
+    font-size: 1.3rem;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.play-button {
+    display: inline-block;
+    background: #FFD700;
+    color: #333;
+    font-weight: 700;
+    font-size: 1.5rem;
+    padding: 15px 40px;
+    border-radius: 50px;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.game-card:hover .play-button {
+    background: #fff;
+    color: #FF4136;
+    transform: scale(1.1);
+}
+
+/* Footer Styles */
+.main-footer {
+    background: linear-gradient(135deg, #FF4136 0%, #DC143C 100%);
+    padding: 30px 0;
+    text-align: center;
+    border-top: 8px solid #FFD700;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.main-footer p {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .game-title {
+        font-size: 3.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 2.5rem;
+        letter-spacing: 3px;
+    }
+    
+    .game-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .game-card {
+        height: 350px;
+    }
+    
+    .game-name {
+        font-size: 2.5rem;
+    }
+    
+    .game-description {
+        font-size: 1.1rem;
+    }
+    
+    .play-button {
+        font-size: 1.2rem;
+        padding: 12px 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .game-title {
+        font-size: 2rem;
+    }
+    
+    .game-card {
+        height: 300px;
+    }
+    
+    .game-name {
+        font-size: 2rem;
+    }
+}
