@@ -162,6 +162,16 @@
                                oninput="updateSliderValue('pair-count')">
                         <div class="slider-hint">Pairs to match in the game</div>
                     </div>
+                    
+                    <div class="slider-group">
+                        <label for="blind-timer-slider">
+                            <span class="slider-label">Blind Mode Timer</span>
+                            <span class="slider-value" id="blind-timer-value">3:00</span>
+                        </label>
+                        <input type="range" id="blind-timer-slider" min="60" max="600" step="30" value="180" 
+                               oninput="updateSliderValue('blind-timer')">
+                        <div class="slider-hint">Time limit for blind mode (1-10 minutes)</div>
+                    </div>
                 </div>
                 
                 <div class="custom-actions">
@@ -327,16 +337,34 @@
                 <h2>🎯 Pick a Pair</h2>
                 <span class="difficulty-badge-game" id="pair-difficulty-badge">Medium</span>
             </div>
-            <p class="game-instructions">Match each item with its correct price! Click an item, then click its price.</p>
             
-            <div class="game-content">
+            <!-- Mode Selection -->
+            <div id="pair-mode-selection" class="mode-selection">
+                <p class="mode-prompt">Choose your game mode:</p>
+                <div class="mode-buttons">
+                    <button class="mode-btn mode-standard" onclick="selectPairMode('standard')">
+                        <span class="mode-icon">⚡</span>
+                        <span class="mode-name">Standard</span>
+                        <span class="mode-desc">Instant feedback on each match</span>
+                    </button>
+                    <button class="mode-btn mode-blind" onclick="selectPairMode('blind')">
+                        <span class="mode-icon">🎯</span>
+                        <span class="mode-name">Blind Mode</span>
+                        <span class="mode-desc">Check all matches at once - beat the clock!</span>
+                    </button>
+                </div>
+            </div>
+            
+            <p class="game-instructions" id="pair-instructions">Match each item with its correct price! Click an item, then click its price.</p>
+            
+            <div class="game-content" id="pair-game-content" style="display: none;">
                 <div class="game-stats">
-                    <div class="stat">
-                        <span class="stat-label">Matches Found:</span>
+                    <div class="stat" id="pair-matches-stat">
+                        <span class="stat-label" id="pair-stat-label">Matches Found:</span>
                         <span class="stat-value" id="pair-matches">0 / 5</span>
                     </div>
-                    <div class="stat">
-                        <span class="stat-label">Time:</span>
+                    <div class="stat" id="pair-timer-stat">
+                        <span class="stat-label" id="pair-timer-label">Time:</span>
                         <span class="stat-value" id="pair-timer">0:00</span>
                     </div>
                 </div>
@@ -350,6 +378,32 @@
                         <h3>Prices</h3>
                         <div id="pair-prices" class="pair-prices"></div>
                     </div>
+                </div>
+
+                <!-- Blind Mode Check Button -->
+                <div id="blind-check-container" class="blind-check-container" style="display: none;">
+                    <button class="check-btn" onclick="checkBlindMatches()">
+                        <span class="check-icon">✓</span>
+                        Check My Matches
+                    </button>
+                    <p class="check-hint">Match all pairs, then check your results!</p>
+                </div>
+
+                <!-- Blind Mode Results -->
+                <div id="blind-results" class="blind-results" style="display: none;">
+                    <div class="results-summary">
+                        <div class="result-stat result-correct">
+                            <span class="result-icon">✓</span>
+                            <span class="result-label">Correct:</span>
+                            <span class="result-number" id="blind-correct">0</span>
+                        </div>
+                        <div class="result-stat result-wrong">
+                            <span class="result-icon">✗</span>
+                            <span class="result-label">Wrong:</span>
+                            <span class="result-number" id="blind-wrong">0</span>
+                        </div>
+                    </div>
+                    <button class="try-again-btn" onclick="tryAgainBlind()">Make Changes</button>
                 </div>
 
                 <div id="pair-feedback" class="feedback"></div>

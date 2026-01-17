@@ -521,6 +521,10 @@ function updateSliderValue(sliderId) {
     
     if (sliderId === 'bag-tolerance') {
         valueDisplay.textContent = slider.value + '%';
+    } else if (sliderId === 'blind-timer') {
+        const minutes = Math.floor(slider.value / 60);
+        const seconds = slider.value % 60;
+        valueDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     } else {
         valueDisplay.textContent = slider.value;
     }
@@ -532,13 +536,18 @@ function loadCustomSettings() {
     
     if (saved) {
         customSettings = JSON.parse(saved);
+        // Add blindTimer if not present (for backwards compatibility)
+        if (!customSettings.blindTimer) {
+            customSettings.blindTimer = 180; // default 3 minutes
+        }
     } else {
         // Use medium difficulty as defaults
         customSettings = {
             bagTries: 3,
             bagTolerance: 5,
             bagItems: 5,
-            pairCount: 5
+            pairCount: 5,
+            blindTimer: 180 // 3 minutes
         };
     }
     
@@ -547,12 +556,14 @@ function loadCustomSettings() {
     document.getElementById('bag-tolerance-slider').value = customSettings.bagTolerance;
     document.getElementById('bag-items-slider').value = customSettings.bagItems;
     document.getElementById('pair-count-slider').value = customSettings.pairCount;
+    document.getElementById('blind-timer-slider').value = customSettings.blindTimer;
     
     // Update displays
     updateSliderValue('bag-tries');
     updateSliderValue('bag-tolerance');
     updateSliderValue('bag-items');
     updateSliderValue('pair-count');
+    updateSliderValue('blind-timer');
 }
 
 function saveCustomSettings() {
@@ -560,7 +571,8 @@ function saveCustomSettings() {
         bagTries: parseInt(document.getElementById('bag-tries-slider').value),
         bagTolerance: parseInt(document.getElementById('bag-tolerance-slider').value),
         bagItems: parseInt(document.getElementById('bag-items-slider').value),
-        pairCount: parseInt(document.getElementById('pair-count-slider').value)
+        pairCount: parseInt(document.getElementById('pair-count-slider').value),
+        blindTimer: parseInt(document.getElementById('blind-timer-slider').value)
     };
     
     localStorage.setItem(CUSTOM_SETTINGS_KEY, JSON.stringify(customSettings));
@@ -588,11 +600,13 @@ function resetCustomSettings() {
     document.getElementById('bag-tolerance-slider').value = 5;
     document.getElementById('bag-items-slider').value = 5;
     document.getElementById('pair-count-slider').value = 5;
+    document.getElementById('blind-timer-slider').value = 180; // 3 minutes
     
     updateSliderValue('bag-tries');
     updateSliderValue('bag-tolerance');
     updateSliderValue('bag-items');
     updateSliderValue('pair-count');
+    updateSliderValue('blind-timer');
     
     saveCustomSettings();
 }
@@ -612,7 +626,12 @@ function startGame(gameType) {
         initBagGame();
     } else if (gameType === 'pair') {
         document.getElementById('pair-game').style.display = 'block';
-        initPairGame();
+        // Show mode selection instead of directly starting game
+        document.getElementById('pair-mode-selection').style.display = 'block';
+        document.getElementById('pair-game-content').style.display = 'none';
+        
+        // Reset instructions
+        document.getElementById('pair-instructions').textContent = 'Match each item with its correct price! Click an item, then click its price.';
     }
 }
 
@@ -681,6 +700,9 @@ function backToMenu() {
     // Clear timers
     if (pairGameState.timerInterval) {
         clearInterval(pairGameState.timerInterval);
+    }
+    if (blindModeState.timerInterval) {
+        clearInterval(blindModeState.timerInterval);
     }
     
     currentGame = null;
@@ -1165,6 +1187,596 @@ function winPairGame() {
     }, isPerfect ? 1200 : 800);
     
     showPairFeedback('', '');
+}
+
+// ============================================
+// PICK A PAIR - MODE SELECTION & BLIND MODE
+// ============================================
+
+let pairGameMode = null; // 'standard' or 'blind'
+let blindModeState = {
+    matches: {}, // stores item-price pairs: { itemIndex: priceIndex }
+    timeLimit: 0,
+    timerInterval: null,
+    checksRemaining: Infinity, // unlimited checks before time runs out
+    gameStarted: false
+};
+
+// Timer durations per difficulty (in seconds)
+const blindModeTimers = {
+    easy: { pairs: { 3: 180, 4: 240, 5: 300, 6: 360, 7: 420, 8: 480 } },
+    medium: { pairs: { 3: 120, 4: 160, 5: 200, 6: 240, 7: 280, 8: 320 } },
+    hard: { pairs: { 3: 90, 4: 120, 5: 150, 6: 180, 7: 210, 8: 240 } },
+    custom: { pairs: { 3: 120, 4: 160, 5: 200, 6: 240, 7: 280, 8: 320 } } // defaults to medium
+};
+
+function selectPairMode(mode) {
+    pairGameMode = mode;
+    
+    // Hide mode selection
+    document.getElementById('pair-mode-selection').style.display = 'none';
+    
+    // Show game content
+    document.getElementById('pair-game-content').style.display = 'block';
+    
+    // Update instructions and UI based on mode
+    const instructions = document.getElementById('pair-instructions');
+    const matchesStat = document.getElementById('pair-matches-stat');
+    const timerStat = document.getElementById('pair-timer-stat');
+    const timerLabel = document.getElementById('pair-timer-label');
+    
+    if (mode === 'blind') {
+        instructions.textContent = 'Match all pairs, then check your results. Beat the clock!';
+        // In blind mode: hide "Matches Found", show only countdown timer
+        matchesStat.style.display = 'none';
+        timerStat.style.display = 'flex';
+        timerLabel.textContent = 'Time Remaining:';
+    } else {
+        instructions.textContent = 'Match each item with its correct price! Click an item, then click its price.';
+        // In standard mode: show both stats
+        matchesStat.style.display = 'flex';
+        timerStat.style.display = 'flex';
+        timerLabel.textContent = 'Time:';
+        document.getElementById('pair-stat-label').textContent = 'Matches Found:';
+    }
+    
+    // Initialize the game
+    if (mode === 'blind') {
+        initBlindMode();
+    } else {
+        initPairGame();
+    }
+}
+
+function initBlindMode() {
+    // Get difficulty settings
+    const settings = difficultySettings.pair[currentDifficulty];
+    
+    // Reset game state
+    pairGameState = {
+        items: [],
+        selectedItem: null,
+        selectedPrice: null,
+        matchesFound: 0,
+        totalPairs: settings.pairs,
+        startTime: Date.now(),
+        timerInterval: null,
+        gameOver: false,
+        difficulty: currentDifficulty
+    };
+    
+    // Reset blind mode state
+    let timeLimit;
+    if (currentDifficulty === 'custom') {
+        // Use custom timer from settings
+        const saved = localStorage.getItem(CUSTOM_SETTINGS_KEY);
+        if (saved) {
+            const customSettings = JSON.parse(saved);
+            timeLimit = customSettings.blindTimer || 180;
+        } else {
+            timeLimit = 180; // default 3 minutes
+        }
+    } else {
+        // Use preset difficulty timers
+        timeLimit = blindModeTimers[currentDifficulty].pairs[settings.pairs];
+    }
+    
+    blindModeState = {
+        matches: {},
+        timeLimit: timeLimit,
+        timerInterval: null,
+        checksRemaining: Infinity,
+        gameStarted: true,
+        finalScore: 0
+    };
+    
+    // Update difficulty badge
+    const badge = document.getElementById('pair-difficulty-badge');
+    badge.textContent = settings.label + ' - Blind';
+    badge.style.background = settings.color;
+    
+    // Select random items for pairing
+    const shuffled = shuffleArray(pairItems);
+    pairGameState.items = shuffled.slice(0, settings.pairs);
+    
+    // Display items and prices
+    displayPairItems();
+    displayPairPrices();
+    
+    // Reset UI
+    document.getElementById('pair-matches').textContent = `${formatTime(blindModeState.timeLimit)}`;
+    document.getElementById('pair-feedback').innerHTML = '';
+    document.getElementById('pair-result').innerHTML = '';
+    document.getElementById('blind-results').style.display = 'none';
+    
+    // Show check button
+    document.getElementById('blind-check-container').style.display = 'block';
+    
+    // Start countdown timer
+    startBlindTimer();
+}
+
+function startBlindTimer() {
+    if (blindModeState.timerInterval) {
+        clearInterval(blindModeState.timerInterval);
+    }
+    
+    pairGameState.startTime = Date.now();
+    const endTime = pairGameState.startTime + (blindModeState.timeLimit * 1000);
+    
+    blindModeState.timerInterval = setInterval(() => {
+        const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+        document.getElementById('pair-matches').textContent = formatTime(remaining);
+        
+        // Flash timer when running low
+        const timerElement = document.getElementById('pair-matches');
+        if (remaining <= 10 && remaining > 0) {
+            timerElement.style.color = '#FF4136';
+            timerElement.style.animation = 'pulse 0.5s infinite';
+        } else if (remaining === 0) {
+            // Time's up!
+            timeUpBlindMode();
+        }
+    }, 100);
+}
+
+function timeUpBlindMode() {
+    if (blindModeState.timerInterval) {
+        clearInterval(blindModeState.timerInterval);
+    }
+    
+    pairGameState.gameOver = true;
+    blindModeState.gameStarted = false;
+    
+    // Disable further clicking
+    document.querySelectorAll('.pair-item, .pair-price').forEach(el => {
+        el.style.pointerEvents = 'none';
+    });
+    
+    // Hide check button
+    document.getElementById('blind-check-container').style.display = 'none';
+    
+    // Calculate final results
+    const totalPairs = pairGameState.totalPairs;
+    let correctMatches = 0;
+    
+    // Check all current matches
+    for (let itemIndex in blindModeState.matches) {
+        const priceIndex = blindModeState.matches[itemIndex];
+        if (parseInt(itemIndex) === parseInt(priceIndex)) {
+            correctMatches++;
+        }
+    }
+    
+    const wrongMatches = Object.keys(blindModeState.matches).length - correctMatches;
+    const unmatched = totalPairs - Object.keys(blindModeState.matches).length;
+    
+    // Calculate score (0-100)
+    const accuracyScore = (correctMatches / totalPairs) * 100;
+    blindModeState.finalScore = Math.round(accuracyScore);
+    
+    // Show visual indicators on all pairs
+    for (let i = 0; i < totalPairs; i++) {
+        const itemDiv = document.querySelector(`.pair-item[data-index="${i}"]`);
+        const matchedPriceIndex = blindModeState.matches[i];
+        
+        if (matchedPriceIndex !== undefined) {
+            const priceDiv = document.querySelector(`.pair-price[data-index="${matchedPriceIndex}"]`);
+            
+            if (i === matchedPriceIndex) {
+                // Correct match - green
+                itemDiv.classList.add('revealed-correct');
+                priceDiv.classList.add('revealed-correct');
+                glowPulse(itemDiv, '#00FF00');
+                glowPulse(priceDiv, '#00FF00');
+            } else {
+                // Wrong match - red
+                itemDiv.classList.add('revealed-wrong');
+                priceDiv.classList.add('revealed-wrong');
+                shakeElement(itemDiv);
+                shakeElement(priceDiv);
+            }
+        } else {
+            // Unmatched - yellow outline
+            itemDiv.classList.add('revealed-unmatched');
+        }
+    }
+    
+    // Show correct matches for unmatched/wrong items
+    setTimeout(() => {
+        for (let i = 0; i < totalPairs; i++) {
+            const matchedPriceIndex = blindModeState.matches[i];
+            
+            // If wrong or unmatched, show the correct price
+            if (matchedPriceIndex === undefined || i !== matchedPriceIndex) {
+                const correctPriceDiv = document.querySelector(`.pair-price[data-index="${i}"]`);
+                if (!correctPriceDiv.classList.contains('revealed-correct')) {
+                    correctPriceDiv.classList.add('revealed-answer');
+                    glowPulse(correctPriceDiv, '#FFD700');
+                }
+            }
+        }
+    }, 1000);
+    
+    // Show final result
+    setTimeout(() => {
+        const result = document.getElementById('pair-result');
+        const isWin = correctMatches === totalPairs;
+        
+        if (isWin) {
+            // Perfect score!
+            result.className = 'result win';
+            result.innerHTML = `
+                <h3>🎉 PERFECT SCORE! 🎉</h3>
+                <p>All ${totalPairs} pairs matched correctly!</p>
+                <p>Score: <strong>${blindModeState.finalScore}/100</strong></p>
+                <p>But time ran out! Try to beat the clock next time!</p>
+                <button class="play-again-btn" onclick="resetPairGame()">Play Again</button>
+            `;
+            createConfetti();
+            screenFlash('success');
+        } else {
+            // Partial or fail
+            result.className = 'result lose';
+            result.innerHTML = `
+                <h3>⏰ Time's Up!</h3>
+                <p>✓ Correct: <strong>${correctMatches}</strong> / ${totalPairs}</p>
+                <p>✗ Wrong: <strong>${wrongMatches}</strong></p>
+                <p>○ Unmatched: <strong>${unmatched}</strong></p>
+                <p>Score: <strong>${blindModeState.finalScore}/100</strong></p>
+                <button class="play-again-btn" onclick="resetPairGame()">Try Again</button>
+            `;
+            screenFlash('fail');
+        }
+        
+        addSparkles(result, 10);
+    }, 2000);
+    
+    // Record statistics (only if some matches were made)
+    if (Object.keys(blindModeState.matches).length > 0) {
+        recordPairGameBlind(correctMatches, totalPairs, blindModeState.finalScore);
+    }
+}
+
+function checkBlindMatches() {
+    // Check how many pairs have been matched
+    const matchedCount = Object.keys(blindModeState.matches).length;
+    const totalPairs = pairGameState.totalPairs;
+    
+    if (matchedCount === 0) {
+        showPairFeedback('⚠️ You haven\'t made any matches yet!', 'incorrect');
+        return;
+    }
+    
+    if (matchedCount < totalPairs) {
+        showPairFeedback(`⚠️ Match all ${totalPairs} pairs before checking! (${matchedCount}/${totalPairs} done)`, 'incorrect');
+        return;
+    }
+    
+    // All pairs matched - calculate results
+    let correctMatches = 0;
+    let wrongMatches = 0;
+    
+    for (let itemIndex in blindModeState.matches) {
+        const priceIndex = blindModeState.matches[itemIndex];
+        if (parseInt(itemIndex) === parseInt(priceIndex)) {
+            correctMatches++;
+        } else {
+            wrongMatches++;
+        }
+    }
+    
+    // Check if perfect
+    if (correctMatches === totalPairs) {
+        // WIN! Stop timer and celebrate
+        if (blindModeState.timerInterval) {
+            clearInterval(blindModeState.timerInterval);
+        }
+        
+        pairGameState.gameOver = true;
+        blindModeState.gameStarted = false;
+        
+        const elapsed = Math.floor((Date.now() - pairGameState.startTime) / 1000);
+        const timeRemaining = blindModeState.timeLimit - elapsed;
+        
+        // Calculate bonus score based on time remaining
+        const timeBonus = Math.round((timeRemaining / blindModeState.timeLimit) * 50);
+        blindModeState.finalScore = 100 + timeBonus;
+        
+        // Mark all as correct
+        for (let i = 0; i < totalPairs; i++) {
+            const itemDiv = document.querySelector(`.pair-item[data-index="${i}"]`);
+            const priceDiv = document.querySelector(`.pair-price[data-index="${blindModeState.matches[i]}"]`);
+            itemDiv.classList.add('revealed-correct');
+            priceDiv.classList.add('revealed-correct');
+            glowPulse(itemDiv, '#00FF00');
+            glowPulse(priceDiv, '#00FF00');
+        }
+        
+        // Hide check button and results
+        document.getElementById('blind-check-container').style.display = 'none';
+        document.getElementById('blind-results').style.display = 'none';
+        
+        // Celebration!
+        createConfetti();
+        screenFlash('perfect');
+        victoryRipple();
+        
+        setTimeout(() => {
+            createStarBurst(window.innerWidth / 2, window.innerHeight / 2, 25);
+            floatingText('PERFECT!', window.innerWidth / 2, window.innerHeight / 2, '#3FFFD8');
+        }, 300);
+        
+        setTimeout(() => {
+            createSpotlight(window.innerWidth / 2, window.innerHeight / 2, 2000);
+        }, 800);
+        
+        // Show result
+        setTimeout(() => {
+            const result = document.getElementById('pair-result');
+            result.className = 'result win';
+            result.innerHTML = `
+                <h3>🎉 PERFECT! ALL CORRECT! 🎉</h3>
+                <p>Time Remaining: <strong>${formatTime(timeRemaining)}</strong></p>
+                <p>Score: <strong>${blindModeState.finalScore}/100</strong> (with time bonus!)</p>
+                <button class="play-again-btn" onclick="resetPairGame()">Play Again</button>
+            `;
+            addSparkles(result, 20);
+            glowPulse(result, 'yellow');
+        }, 1000);
+        
+        // Record statistics
+        recordPairGameBlindWin(elapsed, blindModeState.finalScore);
+        
+    } else {
+        // Some wrong - show results and allow changes
+        document.getElementById('blind-correct').textContent = correctMatches;
+        document.getElementById('blind-wrong').textContent = wrongMatches;
+        document.getElementById('blind-results').style.display = 'block';
+        
+        // Visual feedback
+        showPairFeedback(`${correctMatches} correct, ${wrongMatches} wrong. Make changes and try again!`, 'incorrect');
+        screenFlash('fail');
+    }
+}
+
+function tryAgainBlind() {
+    // Hide results
+    document.getElementById('blind-results').style.display = 'none';
+    showPairFeedback('Make your changes and check again!', 'correct');
+}
+
+function resetPairGame() {
+    // Clear timers
+    if (pairGameState.timerInterval) {
+        clearInterval(pairGameState.timerInterval);
+    }
+    if (blindModeState.timerInterval) {
+        clearInterval(blindModeState.timerInterval);
+    }
+    
+    // Clear selections and state
+    blindModeState.matches = {};
+    pairGameState.selectedItem = null;
+    pairGameState.selectedPrice = null;
+    
+    // Clear all visual states and remove match indicators
+    document.querySelectorAll('.pair-item, .pair-price').forEach(el => {
+        // Remove match indicator if present
+        const indicator = el.querySelector('.match-indicator');
+        if (indicator) indicator.remove();
+        
+        el.className = el.classList.contains('pair-item') ? 'pair-item' : 'pair-price';
+        el.style.pointerEvents = '';
+        el.style.color = '';
+        el.style.animation = '';
+    });
+    
+    // Reset timer display
+    document.getElementById('pair-matches').style.color = '';
+    document.getElementById('pair-matches').style.animation = '';
+    document.getElementById('pair-timer').style.color = '';
+    document.getElementById('pair-timer').style.animation = '';
+    
+    // Reset stats visibility
+    document.getElementById('pair-matches-stat').style.display = 'flex';
+    document.getElementById('pair-timer-stat').style.display = 'flex';
+    
+    // Hide game content
+    document.getElementById('pair-game-content').style.display = 'none';
+    
+    // Show mode selection again
+    document.getElementById('pair-mode-selection').style.display = 'block';
+    
+    // Clear result
+    document.getElementById('pair-result').innerHTML = '';
+    document.getElementById('pair-feedback').innerHTML = '';
+    
+    pairGameMode = null;
+}
+
+// Override selectPairItem for blind mode
+const originalSelectPairItem = selectPairItem;
+selectPairItem = function(index) {
+    if (pairGameMode === 'blind') {
+        selectBlindItem(index);
+    } else {
+        originalSelectPairItem(index);
+    }
+};
+
+// Override selectPairPrice for blind mode
+const originalSelectPairPrice = selectPairPrice;
+selectPairPrice = function(index) {
+    if (pairGameMode === 'blind') {
+        selectBlindPrice(index);
+    } else {
+        originalSelectPairPrice(index);
+    }
+};
+
+function selectBlindItem(index) {
+    if (pairGameState.gameOver || !blindModeState.gameStarted) return;
+    
+    const itemDiv = document.querySelector(`.pair-item[data-index="${index}"]`);
+    
+    // Deselect previous selection
+    document.querySelectorAll('.pair-item').forEach(el => el.classList.remove('selected'));
+    
+    // Select this item
+    itemDiv.classList.add('selected');
+    pairGameState.selectedItem = index;
+    
+    // Check if price is also selected
+    if (pairGameState.selectedPrice !== null) {
+        makeBlindMatch();
+    }
+}
+
+function selectBlindPrice(index) {
+    if (pairGameState.gameOver || !blindModeState.gameStarted) return;
+    
+    const priceDiv = document.querySelector(`.pair-price[data-index="${index}"]`);
+    
+    // Deselect previous selection
+    document.querySelectorAll('.pair-price').forEach(el => el.classList.remove('selected'));
+    
+    // Select this price
+    priceDiv.classList.add('selected');
+    pairGameState.selectedPrice = index;
+    
+    // Check if item is also selected
+    if (pairGameState.selectedItem !== null) {
+        makeBlindMatch();
+    }
+}
+
+function makeBlindMatch() {
+    const itemIndex = pairGameState.selectedItem;
+    const priceIndex = pairGameState.selectedPrice;
+    
+    // Check if this item was already matched to a different price
+    if (blindModeState.matches[itemIndex] !== undefined) {
+        // Unmatch the old price
+        const oldPriceIndex = blindModeState.matches[itemIndex];
+        const oldPriceDiv = document.querySelector(`.pair-price[data-index="${oldPriceIndex}"]`);
+        oldPriceDiv.classList.remove('blind-matched');
+        // Remove old number indicator
+        const oldIndicator = oldPriceDiv.querySelector('.match-indicator');
+        if (oldIndicator) oldIndicator.remove();
+    }
+    
+    // Check if this price was already matched to a different item
+    for (let prevItemIndex in blindModeState.matches) {
+        if (blindModeState.matches[prevItemIndex] === priceIndex) {
+            const prevItemDiv = document.querySelector(`.pair-item[data-index="${prevItemIndex}"]`);
+            prevItemDiv.classList.remove('blind-matched');
+            // Remove old number indicator
+            const oldIndicator = prevItemDiv.querySelector('.match-indicator');
+            if (oldIndicator) oldIndicator.remove();
+            delete blindModeState.matches[prevItemIndex];
+            break;
+        }
+    }
+    
+    // Store the match
+    blindModeState.matches[itemIndex] = priceIndex;
+    
+    // Mark as matched visually (neutral color, no feedback on correctness)
+    const itemDiv = document.querySelector(`.pair-item[data-index="${itemIndex}"]`);
+    const priceDiv = document.querySelector(`.pair-price[data-index="${priceIndex}"]`);
+    
+    itemDiv.classList.remove('selected');
+    itemDiv.classList.add('blind-matched');
+    priceDiv.classList.remove('selected');
+    priceDiv.classList.add('blind-matched');
+    
+    // Add matching number indicators
+    const matchNumber = Object.keys(blindModeState.matches).length;
+    const itemIndicator = document.createElement('span');
+    itemIndicator.className = 'match-indicator';
+    itemIndicator.textContent = matchNumber;
+    itemDiv.appendChild(itemIndicator);
+    
+    const priceIndicator = document.createElement('span');
+    priceIndicator.className = 'match-indicator';
+    priceIndicator.textContent = matchNumber;
+    priceDiv.appendChild(priceIndicator);
+    
+    // Subtle feedback
+    glowPulse(itemDiv, 'blue');
+    glowPulse(priceDiv, 'blue');
+    
+    // Reset selections
+    pairGameState.selectedItem = null;
+    pairGameState.selectedPrice = null;
+    
+    // Check if all pairs are matched
+    const matchedCount = Object.keys(blindModeState.matches).length;
+    if (matchedCount === pairGameState.totalPairs) {
+        showPairFeedback('✓ All pairs matched! Click "Check My Matches" to see results.', 'correct');
+    } else {
+        showPairFeedback(`Paired! (${matchedCount}/${pairGameState.totalPairs})`, 'correct');
+    }
+}
+
+// Statistics recording for blind mode
+function recordPairGameBlindWin(time, score) {
+    const stats = getStats();
+    stats.pair.played++;
+    stats.pair.wins++;
+    stats.pair.totalTime += time;
+    
+    if (!stats.pair.bestTime || time < stats.pair.bestTime) {
+        stats.pair.bestTime = time;
+    }
+    
+    stats.pair.currentStreak++;
+    if (stats.pair.currentStreak > stats.pair.bestStreak) {
+        stats.pair.bestStreak = stats.pair.currentStreak;
+    }
+    
+    saveStats(stats);
+    updateStatsDisplay();
+}
+
+function recordPairGameBlind(correct, total, score) {
+    const stats = getStats();
+    stats.pair.played++;
+    
+    // Only count as win if all correct
+    if (correct === total) {
+        stats.pair.wins++;
+        stats.pair.currentStreak++;
+        if (stats.pair.currentStreak > stats.pair.bestStreak) {
+            stats.pair.bestStreak = stats.pair.currentStreak;
+        }
+    } else {
+        stats.pair.currentStreak = 0;
+    }
+    
+    saveStats(stats);
+    updateStatsDisplay();
 }
 
 // Allow Enter key to submit guess in bag game
