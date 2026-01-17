@@ -332,7 +332,7 @@ header h1 {
     margin-bottom: 40px;
     text-shadow: 
         2px 2px 4px rgba(0, 0, 0, 0.8),
-        0 0 20px var(--sunshine-yellow);
+        0 0 20px #00FF88;
     animation: shimmer 3s ease-in-out infinite;
 }
 
