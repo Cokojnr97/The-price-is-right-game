@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Price is Right - Game Show</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,15 +19,266 @@
         <div id="game-selection" class="game-selection">
             <h2>Choose Your Game</h2>
             <div class="game-buttons">
-                <button class="game-btn" onclick="startGame('bag')">
+                <button class="game-btn" onclick="selectGameForDifficulty('bag')">
                     <span class="game-icon">🛍️</span>
                     <h3>It's in the Bag</h3>
                     <p>Guess the prices of grocery items!</p>
                 </button>
-                <button class="game-btn" onclick="startGame('pair')">
+                <button class="game-btn" onclick="selectGameForDifficulty('pair')">
                     <span class="game-icon">🎯</span>
                     <h3>Pick a Pair</h3>
                     <p>Match items with their correct prices!</p>
+                </button>
+            </div>
+            <button class="stats-btn" onclick="showStats()">
+                📊 View Statistics
+            </button>
+            
+            <!-- Theme Selector -->
+            <div class="theme-selector">
+                <h3>🎨 Choose Theme</h3>
+                <div class="theme-buttons">
+                    <button class="theme-btn active" data-theme="party" onclick="changeTheme('party')">
+                        <span class="theme-preview party-preview"></span>
+                        <span class="theme-name">Party</span>
+                    </button>
+                    <button class="theme-btn" data-theme="light" onclick="changeTheme('light')">
+                        <span class="theme-preview light-preview"></span>
+                        <span class="theme-name">Light</span>
+                    </button>
+                    <button class="theme-btn" data-theme="dark" onclick="changeTheme('dark')">
+                        <span class="theme-preview dark-preview"></span>
+                        <span class="theme-name">Dark</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Difficulty Selection -->
+        <div id="difficulty-selection" class="game-container" style="display: none;">
+            <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+            <h2>⚙️ Select Difficulty</h2>
+            <p class="game-instructions" id="difficulty-game-name">Choose your challenge level</p>
+            
+            <div class="difficulty-grid">
+                <div class="difficulty-card difficulty-easy" onclick="startGameWithDifficulty('easy')">
+                    <div class="difficulty-icon">😊</div>
+                    <h3>Easy</h3>
+                    <div class="difficulty-features" id="easy-features">
+                        <p>• More attempts</p>
+                        <p>• Generous margins</p>
+                        <p>• Perfect for beginners</p>
+                    </div>
+                    <div class="difficulty-badge">Relaxed</div>
+                </div>
+                
+                <div class="difficulty-card difficulty-medium" onclick="startGameWithDifficulty('medium')">
+                    <div class="difficulty-icon">😎</div>
+                    <h3>Medium</h3>
+                    <div class="difficulty-features" id="medium-features">
+                        <p>• Balanced challenge</p>
+                        <p>• Standard gameplay</p>
+                        <p>• Recommended</p>
+                    </div>
+                    <div class="difficulty-badge">Classic</div>
+                </div>
+                
+                <div class="difficulty-card difficulty-hard" onclick="startGameWithDifficulty('hard')">
+                    <div class="difficulty-icon">🔥</div>
+                    <h3>Hard</h3>
+                    <div class="difficulty-features" id="hard-features">
+                        <p>• Limited attempts</p>
+                        <p>• Tight margins</p>
+                        <p>• Expert mode</p>
+                    </div>
+                    <div class="difficulty-badge">Intense</div>
+                </div>
+                
+                <div class="difficulty-card difficulty-custom" onclick="showCustomDifficulty()">
+                    <div class="difficulty-icon">⚙️</div>
+                    <h3>Custom</h3>
+                    <div class="difficulty-features" id="custom-features">
+                        <p>• Configure your own</p>
+                        <p>• Personalized challenge</p>
+                        <p>• Total control</p>
+                    </div>
+                    <div class="difficulty-badge">Your Way</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Difficulty Configuration -->
+        <div id="custom-difficulty-panel" class="game-container" style="display: none;">
+            <button class="back-btn" onclick="backToDifficultySelection()">← Back to Difficulty</button>
+            <h2>⚙️ Custom Configuration</h2>
+            <p class="game-instructions" id="custom-game-name">Configure your challenge</p>
+            
+            <div class="custom-config-container">
+                <!-- Bag Game Settings -->
+                <div id="bag-custom-settings" class="custom-settings-section">
+                    <h3 class="custom-section-title">🛍️ It's in the Bag Settings</h3>
+                    
+                    <div class="slider-group">
+                        <label for="bag-tries-slider">
+                            <span class="slider-label">Number of Tries</span>
+                            <span class="slider-value" id="bag-tries-value">3</span>
+                        </label>
+                        <input type="range" id="bag-tries-slider" min="1" max="10" value="3" 
+                               oninput="updateSliderValue('bag-tries')">
+                        <div class="slider-hint">How many guesses you get</div>
+                    </div>
+                    
+                    <div class="slider-group">
+                        <label for="bag-tolerance-slider">
+                            <span class="slider-label">Price Tolerance</span>
+                            <span class="slider-value" id="bag-tolerance-value">5%</span>
+                        </label>
+                        <input type="range" id="bag-tolerance-slider" min="1" max="20" value="5" 
+                               oninput="updateSliderValue('bag-tolerance')">
+                        <div class="slider-hint">How close your guess needs to be</div>
+                    </div>
+                    
+                    <div class="slider-group">
+                        <label for="bag-items-slider">
+                            <span class="slider-label">Number of Items</span>
+                            <span class="slider-value" id="bag-items-value">5</span>
+                        </label>
+                        <input type="range" id="bag-items-slider" min="3" max="8" value="5" 
+                               oninput="updateSliderValue('bag-items')">
+                        <div class="slider-hint">Items in your shopping bag</div>
+                    </div>
+                </div>
+                
+                <!-- Pair Game Settings -->
+                <div id="pair-custom-settings" class="custom-settings-section">
+                    <h3 class="custom-section-title">🎯 Pick a Pair Settings</h3>
+                    
+                    <div class="slider-group">
+                        <label for="pair-count-slider">
+                            <span class="slider-label">Number of Pairs</span>
+                            <span class="slider-value" id="pair-count-value">5</span>
+                        </label>
+                        <input type="range" id="pair-count-slider" min="3" max="8" value="5" 
+                               oninput="updateSliderValue('pair-count')">
+                        <div class="slider-hint">Pairs to match in the game</div>
+                    </div>
+                </div>
+                
+                <div class="custom-actions">
+                    <button class="reset-custom-btn" onclick="resetCustomSettings()">Reset to Defaults</button>
+                    <button class="apply-custom-btn" onclick="applyCustomDifficulty()">Apply & Start Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Dashboard -->
+        <div id="stats-panel" class="game-container" style="display: none;">
+            <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
+            <h2>📊 Your Statistics</h2>
+            <p class="game-instructions">Track your performance and personal records!</p>
+            
+            <div class="stats-grid">
+                <!-- Overall Stats -->
+                <div class="stat-card stat-card-highlight">
+                    <div class="stat-card-icon">🎮</div>
+                    <div class="stat-card-label">Total Games</div>
+                    <div class="stat-card-value" id="total-games">0</div>
+                </div>
+                
+                <!-- It's in the Bag Stats -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">🛍️ It's in the Bag</h3>
+                    <div class="stat-cards-row">
+                        <div class="stat-card">
+                            <div class="stat-card-icon">🎯</div>
+                            <div class="stat-card-label">Games Played</div>
+                            <div class="stat-card-value" id="bag-played">0</div>
+                        </div>
+                        <div class="stat-card stat-card-success">
+                            <div class="stat-card-icon">🏆</div>
+                            <div class="stat-card-label">Wins</div>
+                            <div class="stat-card-value" id="bag-wins">0</div>
+                        </div>
+                        <div class="stat-card stat-card-danger">
+                            <div class="stat-card-icon">❌</div>
+                            <div class="stat-card-label">Losses</div>
+                            <div class="stat-card-value" id="bag-losses">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon">📈</div>
+                            <div class="stat-card-label">Win Rate</div>
+                            <div class="stat-card-value" id="bag-winrate">0%</div>
+                        </div>
+                    </div>
+                    <div class="stat-cards-row">
+                        <div class="stat-card stat-card-special">
+                            <div class="stat-card-icon">⭐</div>
+                            <div class="stat-card-label">Best Performance</div>
+                            <div class="stat-card-value" id="bag-best">-</div>
+                            <div class="stat-card-subtitle">Fewest tries</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon">🔥</div>
+                            <div class="stat-card-label">Current Streak</div>
+                            <div class="stat-card-value" id="bag-streak">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon">🏅</div>
+                            <div class="stat-card-label">Best Streak</div>
+                            <div class="stat-card-value" id="bag-best-streak">0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pick a Pair Stats -->
+                <div class="stats-section">
+                    <h3 class="stats-section-title">🎯 Pick a Pair</h3>
+                    <div class="stat-cards-row">
+                        <div class="stat-card">
+                            <div class="stat-card-icon">🎯</div>
+                            <div class="stat-card-label">Games Played</div>
+                            <div class="stat-card-value" id="pair-played">0</div>
+                        </div>
+                        <div class="stat-card stat-card-success">
+                            <div class="stat-card-icon">🏆</div>
+                            <div class="stat-card-label">Wins</div>
+                            <div class="stat-card-value" id="pair-wins">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon">📈</div>
+                            <div class="stat-card-label">Win Rate</div>
+                            <div class="stat-card-value" id="pair-winrate">100%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon">⏱️</div>
+                            <div class="stat-card-label">Avg Time</div>
+                            <div class="stat-card-value" id="pair-avg">-</div>
+                        </div>
+                    </div>
+                    <div class="stat-cards-row">
+                        <div class="stat-card stat-card-special">
+                            <div class="stat-card-icon">⚡</div>
+                            <div class="stat-card-label">Best Time</div>
+                            <div class="stat-card-value" id="pair-best">-</div>
+                            <div class="stat-card-subtitle">Personal record</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon">🔥</div>
+                            <div class="stat-card-label">Current Streak</div>
+                            <div class="stat-card-value" id="pair-streak">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon">🏅</div>
+                            <div class="stat-card-label">Best Streak</div>
+                            <div class="stat-card-value" id="pair-best-streak">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-actions">
+                <button class="reset-stats-btn" onclick="resetStats()">
+                    🔄 Reset All Statistics
                 </button>
             </div>
         </div>
@@ -32,7 +286,10 @@
         <!-- It's in the Bag Game -->
         <div id="bag-game" class="game-container" style="display: none;">
             <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
-            <h2>🛍️ It's in the Bag</h2>
+            <div class="game-header-with-badge">
+                <h2>🛍️ It's in the Bag</h2>
+                <span class="difficulty-badge-game" id="bag-difficulty-badge">Medium</span>
+            </div>
             <p class="game-instructions">Guess the total price of all items in the bag! You have 3 tries.</p>
             
             <div class="game-content">
@@ -66,7 +323,10 @@
         <!-- Pick a Pair Game -->
         <div id="pair-game" class="game-container" style="display: none;">
             <button class="back-btn" onclick="backToMenu()">← Back to Menu</button>
-            <h2>🎯 Pick a Pair</h2>
+            <div class="game-header-with-badge">
+                <h2>🎯 Pick a Pair</h2>
+                <span class="difficulty-badge-game" id="pair-difficulty-badge">Medium</span>
+            </div>
             <p class="game-instructions">Match each item with its correct price! Click an item, then click its price.</p>
             
             <div class="game-content">
