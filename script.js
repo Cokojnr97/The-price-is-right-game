@@ -1133,15 +1133,11 @@ function displayPairPrices() {
         originalIndex: index
     })));
     
-    console.log('Current Currency:', currentCurrency);
-    console.log('USD to COP Rate:', USD_TO_COP_RATE);
-    
     prices.forEach(priceObj => {
         const priceDiv = document.createElement('div');
         priceDiv.className = 'pair-price';
         priceDiv.dataset.index = priceObj.originalIndex;
         const convertedPrice = convertPrice(priceObj.price);
-        console.log(`Price ${priceObj.price} converted to:`, convertedPrice);
         priceDiv.textContent = `${formatCurrency(convertedPrice)}`;
         priceDiv.onclick = () => selectPairPrice(priceObj.originalIndex);
         container.appendChild(priceDiv);
