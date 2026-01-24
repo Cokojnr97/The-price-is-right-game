@@ -812,20 +812,25 @@ function backToMenu() {
     document.getElementById('pair-game').style.display = 'none';
     document.getElementById('stats-panel').style.display = 'none';
     document.getElementById('difficulty-selection').style.display = 'none';
+    document.getElementById('custom-difficulty-panel').style.display = 'none';
     
     // Show game selection
     document.getElementById('game-selection').style.display = 'block';
     
-    // Clear timers
+    // Clear timers to prevent memory leaks
     if (pairGameState.timerInterval) {
         clearInterval(pairGameState.timerInterval);
+        pairGameState.timerInterval = null;
     }
     if (blindModeState.timerInterval) {
         clearInterval(blindModeState.timerInterval);
+        blindModeState.timerInterval = null;
     }
     
+    // Reset game state
     currentGame = null;
     selectedGameType = null;
+    pairGameMode = null;
 }
 
 // ============================================
@@ -1896,17 +1901,18 @@ function makeBlindMatch() {
 // Statistics recording for blind mode
 function recordPairGameBlindWin(time, score) {
     const stats = getStats();
-    stats.pair.played++;
-    stats.pair.wins++;
-    stats.pair.totalTime += time;
+    stats.pairGame.gamesPlayed++;
+    stats.pairGame.wins++;
+    stats.pairGame.totalTime += time;
+    stats.overallGames++;
     
-    if (!stats.pair.bestTime || time < stats.pair.bestTime) {
-        stats.pair.bestTime = time;
+    if (!stats.pairGame.bestTime || time < stats.pairGame.bestTime) {
+        stats.pairGame.bestTime = time;
     }
     
-    stats.pair.currentStreak++;
-    if (stats.pair.currentStreak > stats.pair.bestStreak) {
-        stats.pair.bestStreak = stats.pair.currentStreak;
+    stats.pairGame.currentStreak++;
+    if (stats.pairGame.currentStreak > stats.pairGame.bestStreak) {
+        stats.pairGame.bestStreak = stats.pairGame.currentStreak;
     }
     
     saveStats(stats);
@@ -1915,17 +1921,18 @@ function recordPairGameBlindWin(time, score) {
 
 function recordPairGameBlind(correct, total, score) {
     const stats = getStats();
-    stats.pair.played++;
+    stats.pairGame.gamesPlayed++;
+    stats.overallGames++;
     
     // Only count as win if all correct
     if (correct === total) {
-        stats.pair.wins++;
-        stats.pair.currentStreak++;
-        if (stats.pair.currentStreak > stats.pair.bestStreak) {
-            stats.pair.bestStreak = stats.pair.currentStreak;
+        stats.pairGame.wins++;
+        stats.pairGame.currentStreak++;
+        if (stats.pairGame.currentStreak > stats.pairGame.bestStreak) {
+            stats.pairGame.bestStreak = stats.pairGame.currentStreak;
         }
     } else {
-        stats.pair.currentStreak = 0;
+        stats.pairGame.currentStreak = 0;
     }
     
     saveStats(stats);

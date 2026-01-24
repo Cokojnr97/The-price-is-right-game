@@ -1,2 +1,2 @@
-# The-price-is-right-game
-The price is right game show on a website app. 
+# The Price is Right Game
+The Price is Right game show recreated as a web application. Test your pricing skills with two exciting game modes! 
