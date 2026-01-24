@@ -442,6 +442,11 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Force reload script with timestamp to bypass cache
+        const script = document.createElement('script');
+        script.src = 'script.js?t=' + new Date().getTime();
+        document.body.appendChild(script);
+    </script>
 </body>
 </html>
