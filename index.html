@@ -52,6 +52,36 @@
                     </button>
                 </div>
             </div>
+            
+            <!-- Product List Selector -->
+            <div class="product-selector">
+                <h3>🛒 Product List</h3>
+                <div class="product-buttons">
+                    <button class="product-btn active" data-products="standard" onclick="changeProductList('standard')">
+                        <span class="product-icon">🏪</span>
+                        <span class="product-name">Standard</span>
+                    </button>
+                    <button class="product-btn" data-products="colombian" onclick="changeProductList('colombian')">
+                        <span class="product-icon colombian-flag">COL</span>
+                        <span class="product-name">Colombian</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Currency Selector -->
+            <div class="currency-selector">
+                <h3>💵 Currency</h3>
+                <div class="currency-buttons">
+                    <button class="currency-btn active" data-currency="USD" onclick="changeCurrency('USD')">
+                        <span class="currency-icon">💵</span>
+                        <span class="currency-name">USD ($)</span>
+                    </button>
+                    <button class="currency-btn" data-currency="COP" onclick="changeCurrency('COP')">
+                        <span class="currency-icon">💰</span>
+                        <span class="currency-name">COP ($)</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Difficulty Selection -->

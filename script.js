@@ -157,6 +157,94 @@ function applyTheme(theme) {
     });
 }
 
+// ============================================
+// PRODUCT LIST MANAGEMENT
+// ============================================
+
+const PRODUCT_LIST_KEY = 'priceIsRightProductList';
+
+function changeProductList(listType) {
+    currentProductList = listType;
+    localStorage.setItem(PRODUCT_LIST_KEY, listType);
+    
+    // Update active product arrays
+    if (listType === 'colombian') {
+        activeBagItems = colombianBagItems;
+        activePairItems = colombianPairItems;
+    } else {
+        activeBagItems = bagItems;
+        activePairItems = pairItems;
+    }
+    
+    // Update UI
+    document.querySelectorAll('.product-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.products === listType) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+function initProductList() {
+    const saved = localStorage.getItem(PRODUCT_LIST_KEY);
+    if (saved && (saved === 'standard' || saved === 'colombian')) {
+        changeProductList(saved);
+    } else {
+        changeProductList('standard');
+    }
+}
+
+// ============================================
+// CURRENCY MANAGEMENT
+// ============================================
+
+const CURRENCY_KEY = 'priceIsRightCurrency';
+const USD_TO_COP_RATE = 4000; // Approximate conversion rate (adjust as needed)
+
+let currentCurrency = 'USD';
+
+function changeCurrency(currency) {
+    currentCurrency = currency;
+    localStorage.setItem(CURRENCY_KEY, currency);
+    
+    // Update UI
+    document.querySelectorAll('.currency-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.currency === currency) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+function initCurrency() {
+    const saved = localStorage.getItem(CURRENCY_KEY);
+    if (saved && (saved === 'USD' || saved === 'COP')) {
+        changeCurrency(saved);
+    } else {
+        changeCurrency('USD');
+    }
+}
+
+function convertPrice(priceUSD) {
+    if (currentCurrency === 'COP') {
+        return Math.round(priceUSD * USD_TO_COP_RATE);
+    }
+    return priceUSD;
+}
+
+function formatCurrency(price) {
+    if (currentCurrency === 'COP') {
+        // Format COP with thousands separator and no decimals
+        return '$' + price.toLocaleString('es-CO', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    } else {
+        // Format USD with 2 decimals
+        return '$' + price.toFixed(2);
+    }
+}
+
 // Initialize or get stats from localStorage
 function getStats() {
     const defaultStats = {
@@ -412,6 +500,37 @@ const pairItems = [
     { name: "Microwave", icon: "📟", price: 129.99 },
     { name: "Vacuum", icon: "🧹", price: 199.99 }
 ];
+
+// Colombian Products - "It's in the Bag"
+const colombianBagItems = [
+    { name: "Café Juan Valdez", icon: "☕", price: 12.99, img: "https://i.imgur.com/placeholder-coffee.png" },
+    { name: "Arepa Mix", icon: "🫓", price: 4.99, img: "https://i.imgur.com/placeholder-arepa.png" },
+    { name: "Panela (Cane Sugar)", icon: "🍯", price: 3.49, img: "https://i.imgur.com/placeholder-panela.png" },
+    { name: "Aguardiente", icon: "🍾", price: 18.99, img: "https://i.imgur.com/placeholder-aguardiente.png" },
+    { name: "Bocadillo (Guava Paste)", icon: "🍬", price: 5.49, img: "https://i.imgur.com/placeholder-bocadillo.png" },
+    { name: "Arequipe (Dulce de Leche)", icon: "🍯", price: 6.99, img: "https://i.imgur.com/placeholder-arequipe.png" },
+    { name: "Postobón Soda", icon: "🥤", price: 2.49, img: "https://i.imgur.com/placeholder-postobon.png" },
+    { name: "Colombina Candy", icon: "🍭", price: 1.99, img: "https://i.imgur.com/placeholder-colombina.png" },
+    { name: "Papa Criolla", icon: "🥔", price: 4.29, img: "https://i.imgur.com/placeholder-papa.png" },
+    { name: "Ramo Ponqué", icon: "🍰", price: 3.79, img: "https://i.imgur.com/placeholder-ponque.png" }
+];
+
+// Colombian Products - "Pick a Pair"
+const colombianPairItems = [
+    { name: "Coffee Maker", icon: "☕", price: 79.99, img: "https://i.imgur.com/placeholder-coffeemaker.png" },
+    { name: "Colombian Flag", icon: "🇨🇴", price: 15.99, img: "https://i.imgur.com/placeholder-flag.png" },
+    { name: "Ruana (Poncho)", icon: "🧥", price: 45.99, img: "https://i.imgur.com/placeholder-ruana.png" },
+    { name: "Sombrero Vueltiao", icon: "🎩", price: 35.99, img: "https://i.imgur.com/placeholder-sombrero.png" },
+    { name: "Mochilas Wayuu", icon: "👜", price: 89.99, img: "https://i.imgur.com/placeholder-mochila.png" },
+    { name: "Colombian Emerald", icon: "💎", price: 299.99, img: "https://i.imgur.com/placeholder-emerald.png" },
+    { name: "Coffee Grinder", icon: "⚙️", price: 49.99, img: "https://i.imgur.com/placeholder-grinder.png" },
+    { name: "Tejo Game Set", icon: "🎯", price: 129.99, img: "https://i.imgur.com/placeholder-tejo.png" }
+];
+
+// Current active product lists
+let currentProductList = 'standard';
+let activeBagItems = bagItems;
+let activePairItems = pairItems;
 
 // Utility functions
 function shuffleArray(array) {
@@ -737,7 +856,7 @@ function initBagGame() {
     
     // Select random items based on difficulty
     const numItems = Math.floor(Math.random() * (settings.maxItems - settings.minItems + 1)) + settings.minItems;
-    const shuffled = shuffleArray(bagItems);
+    const shuffled = shuffleArray(activeBagItems);
     bagGameState.items = shuffled.slice(0, numItems);
     
     // Calculate total price
@@ -762,9 +881,15 @@ function displayBagItems() {
     bagGameState.items.forEach(item => {
         const itemCard = document.createElement('div');
         itemCard.className = 'item-card';
+        const usdPrice = formatCurrency(item.price);
+        const copPrice = formatCurrency(convertPrice(item.price));
         itemCard.innerHTML = `
             <div class="item-icon">${item.icon}</div>
             <div class="item-name">${item.name}</div>
+            <div class="item-prices" style="display: none;">
+                <div class="item-price-usd">${usdPrice} USD</div>
+                <div class="item-price-cop">${copPrice} COP</div>
+            </div>
         `;
         container.appendChild(itemCard);
     });
@@ -774,7 +899,7 @@ function submitBagGuess() {
     if (bagGameState.gameOver) return;
     
     const guessInput = document.getElementById('bag-guess');
-    const guess = parseFloat(guessInput.value);
+    let guess = parseFloat(guessInput.value.replace(/,/g, '')); // Remove commas for parsing
     
     if (isNaN(guess) || guess <= 0) {
         showBagFeedback('Please enter a valid price!', 'incorrect');
@@ -784,8 +909,10 @@ function submitBagGuess() {
     bagGameState.triesLeft--;
     document.getElementById('bag-tries').textContent = bagGameState.triesLeft;
     
-    const difference = Math.abs(guess - bagGameState.totalPrice);
-    const percentDiff = (difference / bagGameState.totalPrice) * 100;
+    // Compare against the converted price
+    const actualTotal = convertPrice(bagGameState.totalPrice);
+    const difference = Math.abs(guess - actualTotal);
+    const percentDiff = (difference / actualTotal) * 100;
     
     // Get tolerance from difficulty settings
     const settings = difficultySettings.bag[currentDifficulty];
@@ -795,7 +922,7 @@ function submitBagGuess() {
         winBagGame();
     } else if (bagGameState.triesLeft > 0) {
         // Give hints
-        if (guess > bagGameState.totalPrice) {
+        if (guess > actualTotal) {
             if (percentDiff > 20) {
                 showBagFeedback('Way too high! Try a much lower price.', 'incorrect');
             } else {
@@ -822,7 +949,18 @@ function showBagFeedback(message, type) {
 function winBagGame() {
     bagGameState.gameOver = true;
     document.getElementById('bag-guess').disabled = true;
-    document.getElementById('bag-total').textContent = `$${formatPrice(bagGameState.totalPrice)}`;
+    const usdPrice = formatCurrency(bagGameState.totalPrice);
+    const copPrice = formatCurrency(convertPrice(bagGameState.totalPrice));
+    if (currentCurrency === 'USD') {
+        document.getElementById('bag-total').textContent = `${usdPrice} (${copPrice})`;
+    } else {
+        document.getElementById('bag-total').textContent = `${copPrice} (${usdPrice})`;
+    }
+    
+    // Reveal item prices
+    document.querySelectorAll('.item-prices').forEach(priceDiv => {
+        priceDiv.style.display = 'flex';
+    });
     
     // Record win statistics
     const triesUsed = 3 - bagGameState.triesLeft + 1;
@@ -856,9 +994,11 @@ function winBagGame() {
     // Add sparkles to result container
     const result = document.getElementById('bag-result');
     result.className = 'result win';
+    const usdTotal = formatCurrency(bagGameState.totalPrice);
+    const copTotal = formatCurrency(convertPrice(bagGameState.totalPrice));
     result.innerHTML = `
         <h3>🎉 Congratulations! You Win! 🎉</h3>
-        <p>The actual total was <strong>$${formatPrice(bagGameState.totalPrice)}</strong></p>
+        <p>The actual total was <strong>${usdTotal}</strong> USD / <strong>${copTotal}</strong> COP</p>
         <p>You guessed it correctly!</p>
         <button class="play-again-btn" onclick="initBagGame()">Play Again</button>
     `;
@@ -874,7 +1014,18 @@ function winBagGame() {
 function loseBagGame() {
     bagGameState.gameOver = true;
     document.getElementById('bag-guess').disabled = true;
-    document.getElementById('bag-total').textContent = `$${formatPrice(bagGameState.totalPrice)}`;
+    const usdPrice = formatCurrency(bagGameState.totalPrice);
+    const copPrice = formatCurrency(convertPrice(bagGameState.totalPrice));
+    if (currentCurrency === 'USD') {
+        document.getElementById('bag-total').textContent = `${usdPrice} (${copPrice})`;
+    } else {
+        document.getElementById('bag-total').textContent = `${copPrice} (${usdPrice})`;
+    }
+    
+    // Reveal item prices
+    document.querySelectorAll('.item-prices').forEach(priceDiv => {
+        priceDiv.style.display = 'flex';
+    });
     
     // Record loss statistics
     recordBagGameLoss();
@@ -889,9 +1040,11 @@ function loseBagGame() {
     
     const result = document.getElementById('bag-result');
     result.className = 'result lose';
+    const usdTotal = formatCurrency(bagGameState.totalPrice);
+    const copTotal = formatCurrency(convertPrice(bagGameState.totalPrice));
     result.innerHTML = `
         <h3>Sorry, you're out of tries!</h3>
-        <p>The actual total was <strong>$${formatPrice(bagGameState.totalPrice)}</strong></p>
+        <p>The actual total was <strong>${usdTotal}</strong> USD / <strong>${copTotal}</strong> COP</p>
         <p>Better luck next time!</p>
         <button class="play-again-btn" onclick="initBagGame()">Try Again</button>
     `;
@@ -935,7 +1088,7 @@ function initPairGame() {
     instructions.textContent = `Match all ${settings.pairs} pairs! Click an item, then click its price.`;
     
     // Select random items for pairing based on difficulty
-    const shuffled = shuffleArray(pairItems);
+    const shuffled = shuffleArray(activePairItems);
     pairGameState.items = shuffled.slice(0, settings.pairs);
     
     // Display items and prices
@@ -979,7 +1132,7 @@ function displayPairPrices() {
         const priceDiv = document.createElement('div');
         priceDiv.className = 'pair-price';
         priceDiv.dataset.index = priceObj.originalIndex;
-        priceDiv.textContent = `$${formatPrice(priceObj.price)}`;
+        priceDiv.textContent = `${formatCurrency(priceObj.price)}`;
         priceDiv.onclick = () => selectPairPrice(priceObj.originalIndex);
         container.appendChild(priceDiv);
     });
@@ -1296,7 +1449,7 @@ function initBlindMode() {
     badge.style.background = settings.color;
     
     // Select random items for pairing
-    const shuffled = shuffleArray(pairItems);
+    const shuffled = shuffleArray(activePairItems);
     pairGameState.items = shuffled.slice(0, settings.pairs);
     
     // Display items and prices
@@ -1304,7 +1457,7 @@ function initBlindMode() {
     displayPairPrices();
     
     // Reset UI
-    document.getElementById('pair-matches').textContent = `${formatTime(blindModeState.timeLimit)}`;
+    document.getElementById('pair-timer').textContent = `${formatTime(blindModeState.timeLimit)}`;
     document.getElementById('pair-feedback').innerHTML = '';
     document.getElementById('pair-result').innerHTML = '';
     document.getElementById('blind-results').style.display = 'none';
@@ -1326,10 +1479,10 @@ function startBlindTimer() {
     
     blindModeState.timerInterval = setInterval(() => {
         const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
-        document.getElementById('pair-matches').textContent = formatTime(remaining);
+        document.getElementById('pair-timer').textContent = formatTime(remaining);
         
         // Flash timer when running low
-        const timerElement = document.getElementById('pair-matches');
+        const timerElement = document.getElementById('pair-timer');
         if (remaining <= 10 && remaining > 0) {
             timerElement.style.color = '#FF4136';
             timerElement.style.animation = 'pulse 0.5s infinite';
@@ -1783,6 +1936,12 @@ function recordPairGameBlind(correct, total, score) {
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize theme
     initTheme();
+    
+    // Initialize product list
+    initProductList();
+    
+    // Initialize currency
+    initCurrency();
     
     // Add Enter key support for bag game
     const bagGuessInput = document.getElementById('bag-guess');

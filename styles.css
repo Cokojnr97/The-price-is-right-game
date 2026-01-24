@@ -634,6 +634,38 @@ header h1 {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    margin-bottom: 8px;
+}
+
+.item-prices {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+}
+
+.item-price-usd,
+.item-price-cop {
+    font-family: var(--font-accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
+}
+
+.item-price-usd {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.item-price-cop {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .item-price {
@@ -2704,4 +2736,202 @@ header h1 {
         font-size: 1.1rem;
         padding: 15px 35px;
     }
+}
+
+/* ============================================
+   PRODUCT LIST SELECTOR
+   ============================================ */
+
+.product-selector {
+    margin-top: 20px;
+    padding: 30px;
+    background: var(--container-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 2px solid var(--container-border);
+    border-radius: 25px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.product-selector h3 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--text-primary);
+    text-shadow: var(--text-shadow);
+}
+
+.product-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.product-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 25px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.product-btn:hover {
+    transform: translateY(-5px);
+    border-color: var(--electric-cyan);
+    background: rgba(31, 162, 255, 0.2);
+    box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(31, 162, 255, 0.5);
+}
+
+.product-btn.active {
+    border-color: var(--electric-cyan);
+    background: rgba(31, 162, 255, 0.3);
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(31, 162, 255, 0.6);
+}
+
+.product-icon {
+    font-size: 3rem;
+}
+
+.product-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-shadow: var(--text-shadow);
+}
+
+@media (max-width: 768px) {
+    .product-buttons {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .product-btn {
+        padding: 20px;
+    }
+}
+
+/* ============================================
+   CURRENCY SELECTOR
+   ============================================ */
+
+.currency-selector {
+    margin-top: 20px;
+    padding: 30px;
+    background: var(--container-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 2px solid var(--container-border);
+    border-radius: 25px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.currency-selector h3 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--text-primary);
+    text-shadow: var(--text-shadow);
+}
+
+.currency-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.currency-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 25px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.currency-btn:hover {
+    transform: translateY(-5px);
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.2);
+    box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(76, 175, 80, 0.5);
+}
+
+.currency-btn.active {
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.3);
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(76, 175, 80, 0.6);
+}
+
+.currency-icon {
+    font-size: 3rem;
+}
+
+.currency-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-shadow: var(--text-shadow);
+}
+
+@media (max-width: 768px) {
+    .currency-buttons {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .currency-btn {
+        padding: 20px;
+    }
+}
+
+/* Colombian Flag Styling */
+.colombian-flag {
+    background: linear-gradient(to bottom, 
+        #FCD116 0%, 
+        #FCD116 50%, 
+        #003893 50%, 
+        #003893 75%, 
+        #CE1126 75%, 
+        #CE1126 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
+    text-shadow: none !important;
 }
