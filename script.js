@@ -503,28 +503,28 @@ const pairItems = [
 
 // Colombian Products - "It's in the Bag"
 const colombianBagItems = [
-    { name: "Café Juan Valdez", icon: "☕", price: 12.99, img: "https://i.imgur.com/placeholder-coffee.png" },
-    { name: "Arepa Mix", icon: "🫓", price: 4.99, img: "https://i.imgur.com/placeholder-arepa.png" },
-    { name: "Panela (Cane Sugar)", icon: "🍯", price: 3.49, img: "https://i.imgur.com/placeholder-panela.png" },
-    { name: "Aguardiente", icon: "🍾", price: 18.99, img: "https://i.imgur.com/placeholder-aguardiente.png" },
-    { name: "Bocadillo (Guava Paste)", icon: "🍬", price: 5.49, img: "https://i.imgur.com/placeholder-bocadillo.png" },
-    { name: "Arequipe (Dulce de Leche)", icon: "🍯", price: 6.99, img: "https://i.imgur.com/placeholder-arequipe.png" },
-    { name: "Postobón Soda", icon: "🥤", price: 2.49, img: "https://i.imgur.com/placeholder-postobon.png" },
-    { name: "Colombina Candy", icon: "🍭", price: 1.99, img: "https://i.imgur.com/placeholder-colombina.png" },
-    { name: "Papa Criolla", icon: "🥔", price: 4.29, img: "https://i.imgur.com/placeholder-papa.png" },
-    { name: "Ramo Ponqué", icon: "🍰", price: 3.79, img: "https://i.imgur.com/placeholder-ponque.png" }
+    { name: "Café Juan Valdez", icon: "☕", price: 5.99, img: "https://i.imgur.com/placeholder-coffee.png" },
+    { name: "Arepa Mix", icon: "🫓", price: 1.99, img: "https://i.imgur.com/placeholder-arepa.png" },
+    { name: "Panela (Cane Sugar)", icon: "🍯", price: 1.49, img: "https://i.imgur.com/placeholder-panela.png" },
+    { name: "Aguardiente", icon: "🍾", price: 8.99, img: "https://i.imgur.com/placeholder-aguardiente.png" },
+    { name: "Bocadillo (Guava Paste)", icon: "🍬", price: 2.49, img: "https://i.imgur.com/placeholder-bocadillo.png" },
+    { name: "Arequipe (Dulce de Leche)", icon: "🍯", price: 2.99, img: "https://i.imgur.com/placeholder-arequipe.png" },
+    { name: "Postobón Soda", icon: "🥤", price: 0.99, img: "https://i.imgur.com/placeholder-postobon.png" },
+    { name: "Colombina Candy", icon: "🍭", price: 0.79, img: "https://i.imgur.com/placeholder-colombina.png" },
+    { name: "Papa Criolla", icon: "🥔", price: 1.79, img: "https://i.imgur.com/placeholder-papa.png" },
+    { name: "Ramo Ponqué", icon: "🍰", price: 1.49, img: "https://i.imgur.com/placeholder-ponque.png" }
 ];
 
 // Colombian Products - "Pick a Pair"
 const colombianPairItems = [
-    { name: "Coffee Maker", icon: "☕", price: 79.99, img: "https://i.imgur.com/placeholder-coffeemaker.png" },
-    { name: "Colombian Flag", icon: "🇨🇴", price: 15.99, img: "https://i.imgur.com/placeholder-flag.png" },
-    { name: "Ruana (Poncho)", icon: "🧥", price: 45.99, img: "https://i.imgur.com/placeholder-ruana.png" },
-    { name: "Sombrero Vueltiao", icon: "🎩", price: 35.99, img: "https://i.imgur.com/placeholder-sombrero.png" },
-    { name: "Mochilas Wayuu", icon: "👜", price: 89.99, img: "https://i.imgur.com/placeholder-mochila.png" },
-    { name: "Colombian Emerald", icon: "💎", price: 299.99, img: "https://i.imgur.com/placeholder-emerald.png" },
-    { name: "Coffee Grinder", icon: "⚙️", price: 49.99, img: "https://i.imgur.com/placeholder-grinder.png" },
-    { name: "Tejo Game Set", icon: "🎯", price: 129.99, img: "https://i.imgur.com/placeholder-tejo.png" }
+    { name: "Coffee Maker", icon: "☕", price: 35.99, img: "https://i.imgur.com/placeholder-coffeemaker.png" },
+    { name: "Colombian Flag", icon: "🇨🇴", price: 7.99, img: "https://i.imgur.com/placeholder-flag.png" },
+    { name: "Ruana (Poncho)", icon: "🧥", price: 22.99, img: "https://i.imgur.com/placeholder-ruana.png" },
+    { name: "Sombrero Vueltiao", icon: "🎩", price: 18.99, img: "https://i.imgur.com/placeholder-sombrero.png" },
+    { name: "Mochilas Wayuu", icon: "👜", price: 45.99, img: "https://i.imgur.com/placeholder-mochila.png" },
+    { name: "Colombian Emerald", icon: "💎", price: 149.99, img: "https://i.imgur.com/placeholder-emerald.png" },
+    { name: "Coffee Grinder", icon: "⚙️", price: 24.99, img: "https://i.imgur.com/placeholder-grinder.png" },
+    { name: "Tejo Game Set", icon: "🎯", price: 59.99, img: "https://i.imgur.com/placeholder-tejo.png" }
 ];
 
 // Current active product lists
