@@ -503,16 +503,16 @@ const pairItems = [
 
 // Colombian Products - "It's in the Bag"
 const colombianBagItems = [
-    { name: "Café Juan Valdez", icon: "☕", price: 5.99, img: "https://i.imgur.com/placeholder-coffee.png" },
-    { name: "Arepa Mix", icon: "🫓", price: 1.99, img: "https://i.imgur.com/placeholder-arepa.png" },
-    { name: "Panela (Cane Sugar)", icon: "🍯", price: 1.49, img: "https://i.imgur.com/placeholder-panela.png" },
-    { name: "Aguardiente", icon: "🍾", price: 8.99, img: "https://i.imgur.com/placeholder-aguardiente.png" },
-    { name: "Bocadillo (Guava Paste)", icon: "🍬", price: 2.49, img: "https://i.imgur.com/placeholder-bocadillo.png" },
-    { name: "Arequipe (Dulce de Leche)", icon: "🍯", price: 2.99, img: "https://i.imgur.com/placeholder-arequipe.png" },
-    { name: "Postobón Soda", icon: "🥤", price: 0.99, img: "https://i.imgur.com/placeholder-postobon.png" },
-    { name: "Colombina Candy", icon: "🍭", price: 0.79, img: "https://i.imgur.com/placeholder-colombina.png" },
-    { name: "Papa Criolla", icon: "🥔", price: 1.79, img: "https://i.imgur.com/placeholder-papa.png" },
-    { name: "Ramo Ponqué", icon: "🍰", price: 1.49, img: "https://i.imgur.com/placeholder-ponque.png" }
+    { name: "Café Juan Valdez (250g)", icon: "☕", price: 5.99, img: "https://i.imgur.com/placeholder-coffee.png" },
+    { name: "Arepa Mix (500g)", icon: "🫓", price: 1.99, img: "https://i.imgur.com/placeholder-arepa.png" },
+    { name: "Panela (Cane Sugar) (250g)", icon: "🍯", price: 1.49, img: "https://i.imgur.com/placeholder-panela.png" },
+    { name: "Aguardiente (750ml)", icon: "🍾", price: 8.99, img: "https://i.imgur.com/placeholder-aguardiente.png" },
+    { name: "Bocadillo (Guava Paste) (300g)", icon: "🍬", price: 2.49, img: "https://i.imgur.com/placeholder-bocadillo.png" },
+    { name: "Arequipe (Dulce de Leche) (250g)", icon: "🍯", price: 2.99, img: "https://i.imgur.com/placeholder-arequipe.png" },
+    { name: "Postobón Soda (350ml)", icon: "🥤", price: 0.99, img: "https://i.imgur.com/placeholder-postobon.png" },
+    { name: "Colombina Candy (100g)", icon: "🍭", price: 0.79, img: "https://i.imgur.com/placeholder-colombina.png" },
+    { name: "Papa Criolla (500g)", icon: "🥔", price: 1.79, img: "https://i.imgur.com/placeholder-papa.png" },
+    { name: "Ramo Ponqué (1 unidad)", icon: "🍰", price: 1.49, img: "https://i.imgur.com/placeholder-ponque.png" }
 ];
 
 // Colombian Products - "Pick a Pair"
